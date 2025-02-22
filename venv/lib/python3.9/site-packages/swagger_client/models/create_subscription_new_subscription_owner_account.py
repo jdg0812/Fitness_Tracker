@@ -1,0 +1,726 @@
+# coding: utf-8
+
+"""
+    API Reference
+
+      # Introduction  Welcome to the REST API reference for the Zuora Billing, Payments, and Central Platform!  To learn about the common use cases of Zuora REST APIs, check out the [REST API Tutorials](https://www.zuora.com/developer/rest-api/api-guides/overview/).  In addition to Zuora API Reference, we also provide API references for other Zuora products:    * [Revenue API Reference](https://www.zuora.com/developer/api-references/revenue/overview/)   * [Collections API Reference](https://www.zuora.com/developer/api-references/collections/overview/)      The Zuora REST API provides a broad set of operations and resources that:    * Enable Web Storefront integration from your website.   * Support self-service subscriber sign-ups and account management.   * Process revenue schedules through custom revenue rule models.   * Enable manipulation of most objects in the Zuora Billing Object Model.  Want to share your opinion on how our API works for you? <a href=\"https://community.zuora.com/t5/Developers/API-Feedback-Form/gpm-p/21399\" target=\"_blank\">Tell us how you feel </a>about using our API and what we can do to make it better.  Some of our older APIs are no longer recommended but still available, not affecting any existing integration. To find related API documentation, see [Older API Reference](https://www.zuora.com/developer/api-references/older-api/overview/).   ## Access to the API  If you have a Zuora tenant, you can access the Zuora REST API via one of the following endpoints:  | Tenant              | Base URL for REST Endpoints | |-------------------------|-------------------------| |US Cloud 1 Production | https://rest.na.zuora.com  | |US Cloud 1 API Sandbox |  https://rest.sandbox.na.zuora.com | |US Cloud 2 Production | https://rest.zuora.com | |US Cloud 2 API Sandbox | https://rest.apisandbox.zuora.com| |US Central Sandbox | https://rest.test.zuora.com |   |US Performance Test | https://rest.pt1.zuora.com | |US Production Copy | Submit a request at <a href=\"http://support.zuora.com/\" target=\"_blank\">Zuora Global Support</a> to enable the Zuora REST API in your tenant and obtain the base URL for REST endpoints. See [REST endpoint base URL of Production Copy (Service) Environment for existing and new customers](https://community.zuora.com/t5/API/REST-endpoint-base-URL-of-Production-Copy-Service-Environment/td-p/29611) for more information. | |EU Production | https://rest.eu.zuora.com | |EU API Sandbox | https://rest.sandbox.eu.zuora.com | |EU Central Sandbox | https://rest.test.eu.zuora.com |  The Production endpoint provides access to your live user data. Sandbox tenants are a good place to test code without affecting real-world data. If you would like Zuora to provision a Sandbox tenant for you, contact your Zuora representative for assistance.   If you do not have a Zuora tenant, go to <a href=\"https://www.zuora.com/resource/zuora-test-drive\" target=\"_blank\">https://www.zuora.com/resource/zuora-test-drive</a> and sign up for a Production Test Drive tenant. The tenant comes with seed data, including a sample product catalog.   # Error Handling  If a request to Zuora Billing REST API with an endpoint starting with `/v1` (except [Actions](https://www.zuora.com/developer/api-references/api/tag/Actions) and CRUD operations) fails, the response will contain an eight-digit error code with a corresponding error message to indicate the details of the error.  The following code snippet is a sample error response that contains an error code and message pair:  ```  {    \"success\": false,    \"processId\": \"CBCFED6580B4E076\",    \"reasons\":  [      {       \"code\": 53100320,       \"message\": \"'termType' value should be one of: TERMED, EVERGREEN\"      }     ]  } ``` The `success` field indicates whether the API request has succeeded. The `processId` field is a Zuora internal ID that you can provide to Zuora Global Support for troubleshooting purposes.  The `reasons` field contains the actual error code and message pair. The error code begins with `5` or `6` means that you encountered a certain issue that is specific to a REST API resource in Zuora Billing, Payments, and Central Platform. For example, `53100320` indicates that an invalid value is specified for the `termType` field of the `subscription` object.  The error code beginning with `9` usually indicates that an authentication-related issue occurred, and it can also indicate other unexpected errors depending on different cases. For example, `90000011` indicates that an invalid credential is provided in the request header.   When troubleshooting the error, you can divide the error code into two components: REST API resource code and error category code. See the following Zuora error code sample:  <a href=\"https://www.zuora.com/developer/images/ZuoraErrorCode.jpeg\" target=\"_blank\"><img src=\"https://www.zuora.com/developer/images/ZuoraErrorCode.jpeg\" alt=\"Zuora Error Code Sample\"></a>   **Note:** Zuora determines resource codes based on the request payload. Therefore, if GET and DELETE requests that do not contain payloads fail, you will get `500000` as the resource code, which indicates an unknown object and an unknown field.  The error category code of these requests is valid and follows the rules described in the [Error Category Codes](https://www.zuora.com/developer/api-references/api/overview/#section/Error-Handling/Error-Category-Codes) section.  In such case, you can refer to the returned error message to troubleshoot.   ## REST API Resource Codes  The 6-digit resource code indicates the REST API resource, typically a field of a Zuora object, on which the issue occurs. In the preceding example, `531003` refers to the `termType` field of the `subscription` object.   The value range for all REST API resource codes is from `500000` to `679999`. See <a href=\"https://knowledgecenter.zuora.com/Central_Platform/API/AA_REST_API/Resource_Codes\" target=\"_blank\">Resource Codes</a> in the Knowledge Center for a full list of resource codes.  ## Error Category Codes  The 2-digit error category code identifies the type of error, for example, resource not found or missing required field.   The following table describes all error categories and the corresponding resolution:  | Code    | Error category              | Description    | Resolution    | |:--------|:--------|:--------|:--------| | 10      | Permission or access denied | The request cannot be processed because a certain tenant or user permission is missing. | Check the missing tenant or user permission in the response message and contact <a href=\"https://support.zuora.com\" target=\"_blank\">Zuora Global Support</a> for enablement. | | 11      | Authentication failed       | Authentication fails due to invalid API authentication credentials. | Ensure that a valid API credential is specified. | | 20      | Invalid format or value     | The request cannot be processed due to an invalid field format or value. | Check the invalid field in the error message, and ensure that the format and value of all fields you passed in are valid. | | 21      | Unknown field in request    | The request cannot be processed because an unknown field exists in the request body. | Check the unknown field name in the response message, and ensure that you do not include any unknown field in the request body. | | 22      | Missing required field      | The request cannot be processed because a required field in the request body is missing. | Check the missing field name in the response message, and ensure that you include all required fields in the request body. | | 23      | Missing required parameter  | The request cannot be processed because a required query parameter is missing. | Check the missing parameter name in the response message, and ensure that you include the parameter in the query. | | 30      | Rule restriction            | The request cannot be processed due to the violation of a Zuora business rule. | Check the response message and ensure that the API request meets the specified business rules. | | 40      | Not found                   | The specified resource cannot be found. | Check the response message and ensure that the specified resource exists in your Zuora tenant. | | 45      | Unsupported request         | The requested endpoint does not support the specified HTTP method. | Check your request and ensure that the endpoint and method matches. | | 50      | Locking contention          | This request cannot be processed because the objects this request is trying to modify are being modified by another API request, UI operation, or batch job process. | <p>Resubmit the request first to have another try.</p> <p>If this error still occurs, contact <a href=\"https://support.zuora.com\" target=\"_blank\">Zuora Global Support</a> with the returned `Zuora-Request-Id` value in the response header for assistance.</p> | | 60      | Internal error              | The server encounters an internal error. | Contact <a href=\"https://support.zuora.com\" target=\"_blank\">Zuora Global Support</a> with the returned `Zuora-Request-Id` value in the response header for assistance. | | 61      | Temporary error             | A temporary error occurs during request processing, for example, a database communication error. | <p>Resubmit the request first to have another try.</p> <p>If this error still occurs, contact <a href=\"https://support.zuora.com\" target=\"_blank\">Zuora Global Support</a> with the returned `Zuora-Request-Id` value in the response header for assistance. </p>| | 70      | Request exceeded limit      | The total number of concurrent requests exceeds the limit allowed by the system. | <p>Resubmit the request after the number of seconds specified by the `Retry-After` value in the response header.</p> <p>Check [Concurrent request limits](https://www.zuora.com/developer/rest-api/general-concepts/rate-concurrency-limits/) for details about Zuora’s concurrent request limit policy.</p> | | 90      | Malformed request           | The request cannot be processed due to JSON syntax errors. | Check the syntax error in the JSON request body and ensure that the request is in the correct JSON format. | | 99      | Integration error           | The server encounters an error when communicating with an external system, for example, payment gateway, tax engine provider. | Check the response message and take action accordingly. |   # API Versions  The Zuora REST API are version controlled. Versioning ensures that Zuora REST API changes are backward compatible. Zuora uses a major and minor version nomenclature to manage changes. By specifying a version in a REST request, you can get expected responses regardless of future changes to the API.  ## Major Version  The major version number of the REST API appears in the REST URL. In this API reference, only the **v1** major version is available. For example, `POST https://rest.zuora.com/v1/subscriptions`.  ## Minor Version  Zuora uses minor versions for the REST API to control small changes. For example, a field in a REST method is deprecated and a new field is used to replace it.   Some fields in the REST methods are supported as of minor versions. If a field is not noted with a minor version, this field is available for all minor versions. If a field is noted with a minor version, this field is in version control. You must specify the supported minor version in the request header to process without an error.   If a field is in version control, it is either with a minimum minor version or a maximum minor version, or both of them. You can only use this field with the minor version between the minimum and the maximum minor versions. For example, the `invoiceCollect` field in the POST Subscription method is in version control and its maximum minor version is 189.0. You can only use this field with the minor version 189.0 or earlier.  If you specify a version number in the request header that is not supported, Zuora will use the minimum minor version of the REST API. In our REST API documentation, if a field or feature requires a minor version number, we note that in the field description.  You only need to specify the version number when you use the fields require a minor version. To specify the minor version, set the `zuora-version` parameter to the minor version number in the request header for the request call. For example, the `collect` field is in 196.0 minor version. If you want to use this field for the POST Subscription method, set the  `zuora-version` parameter to `196.0` in the request header. The `zuora-version` parameter is case sensitive.  For all the REST API fields, by default, if the minor version is not specified in the request header, Zuora will use the minimum minor version of the REST API to avoid breaking your integration.   ### Minor Version History  The supported minor versions are not serial. This section documents the changes made to each Zuora REST API minor version.  The following table lists the supported versions and the fields that have a Zuora REST API minor version.  | Fields         | Minor Version      | REST Methods    | Description | |:--------|:--------|:--------|:--------| | invoiceCollect | 189.0 and earlier  | [Create Subscription](https://www.zuora.com/developer/api-references/api/operation/POST_Subscription \"Create Subscription\"); [Update Subscription](https://www.zuora.com/developer/api-references/api/operation/PUT_Subscription \"Update Subscription\"); [Renew Subscription](https://www.zuora.com/developer/api-references/api/operation/PUT_RenewSubscription \"Renew Subscription\"); [Cancel Subscription](https://www.zuora.com/developer/api-references/api/operation/PUT_CancelSubscription \"Cancel Subscription\"); [Suspend Subscription](https://www.zuora.com/developer/api-references/api/operation/PUT_SuspendSubscription \"Suspend Subscription\"); [Resume Subscription](https://www.zuora.com/developer/api-references/api/operation/PUT_ResumeSubscription \"Resume Subscription\"); [Create Account](https://www.zuora.com/developer/api-references/api/operation/POST_Account \"Create Account\")|Generates an invoice and collects a payment for a subscription. | | collect        | 196.0 and later    | [Create Subscription](https://www.zuora.com/developer/api-references/api/operation/POST_Subscription \"Create Subscription\"); [Update Subscription](https://www.zuora.com/developer/api-references/api/operation/PUT_Subscription \"Update Subscription\"); [Renew Subscription](https://www.zuora.com/developer/api-references/api/operation/PUT_RenewSubscription \"Renew Subscription\"); [Cancel Subscription](https://www.zuora.com/developer/api-references/api/operation/PUT_CancelSubscription \"Cancel Subscription\"); [Suspend Subscription](https://www.zuora.com/developer/api-references/api/operation/PUT_SuspendSubscription \"Suspend Subscription\"); [Resume Subscription](https://www.zuora.com/developer/api-references/api/operation/PUT_ResumeSubscription \"Resume Subscription\"); [Create Account](https://www.zuora.com/developer/api-references/api/operation/POST_Account \"Create Account\")|Collects an automatic payment for a subscription. | | invoice | 196.0 and 207.0| [Create Subscription](https://www.zuora.com/developer/api-references/api/operation/POST_Subscription \"Create Subscription\"); [Update Subscription](https://www.zuora.com/developer/api-references/api/operation/PUT_Subscription \"Update Subscription\"); [Renew Subscription](https://www.zuora.com/developer/api-references/api/operation/PUT_RenewSubscription \"Renew Subscription\"); [Cancel Subscription](https://www.zuora.com/developer/api-references/api/operation/PUT_CancelSubscription \"Cancel Subscription\"); [Suspend Subscription](https://www.zuora.com/developer/api-references/api/operation/PUT_SuspendSubscription \"Suspend Subscription\"); [Resume Subscription](https://www.zuora.com/developer/api-references/api/operation/PUT_ResumeSubscription \"Resume Subscription\"); [Create Account](https://www.zuora.com/developer/api-references/api/operation/POST_Account \"Create Account\")|Generates an invoice for a subscription. | | invoiceTargetDate | 206.0 and earlier  | [Preview Subscription](https://www.zuora.com/developer/api-references/api/operation/POST_PreviewSubscription \"Preview Subscription\") |Date through which charges are calculated on the invoice, as `yyyy-mm-dd`. | | invoiceTargetDate | 207.0 and earlier  | [Create Subscription](https://www.zuora.com/developer/api-references/api/operation/POST_Subscription \"Create Subscription\"); [Update Subscription](https://www.zuora.com/developer/api-references/api/operation/PUT_Subscription \"Update Subscription\"); [Renew Subscription](https://www.zuora.com/developer/api-references/api/operation/PUT_RenewSubscription \"Renew Subscription\"); [Cancel Subscription](https://www.zuora.com/developer/api-references/api/operation/PUT_CancelSubscription \"Cancel Subscription\"); [Suspend Subscription](https://www.zuora.com/developer/api-references/api/operation/PUT_SuspendSubscription \"Suspend Subscription\"); [Resume Subscription](https://www.zuora.com/developer/api-references/api/operation/PUT_ResumeSubscription \"Resume Subscription\"); [Create Account](https://www.zuora.com/developer/api-references/api/operation/POST_Account \"Create Account\")|Date through which charges are calculated on the invoice, as `yyyy-mm-dd`. | | targetDate | 207.0 and later | [Preview Subscription](https://www.zuora.com/developer/api-references/api/operation/POST_PreviewSubscription \"Preview Subscription\") |Date through which charges are calculated on the invoice, as `yyyy-mm-dd`. | | targetDate | 211.0 and later | [Create Subscription](https://www.zuora.com/developer/api-references/api/operation/POST_Subscription \"Create Subscription\"); [Update Subscription](https://www.zuora.com/developer/api-references/api/operation/PUT_Subscription \"Update Subscription\"); [Renew Subscription](https://www.zuora.com/developer/api-references/api/operation/PUT_RenewSubscription \"Renew Subscription\"); [Cancel Subscription](https://www.zuora.com/developer/api-references/api/operation/PUT_CancelSubscription \"Cancel Subscription\"); [Suspend Subscription](https://www.zuora.com/developer/api-references/api/operation/PUT_SuspendSubscription \"Suspend Subscription\"); [Resume Subscription](https://www.zuora.com/developer/api-references/api/operation/PUT_ResumeSubscription \"Resume Subscription\"); [Create Account](https://www.zuora.com/developer/api-references/api/operation/POST_Account \"Create Account\")|Date through which charges are calculated on the invoice, as `yyyy-mm-dd`. | | includeExisting DraftInvoiceItems | 206.0 and earlier| [Preview Subscription](https://www.zuora.com/developer/api-references/api/operation/POST_PreviewSubscription \"Preview Subscription\"); [Update Subscription](https://www.zuora.com/developer/api-references/api/operation/PUT_Subscription \"Update Subscription\") | Specifies whether to include draft invoice items in subscription previews. Specify it to be `true` (default) to include draft invoice items in the preview result. Specify it to be `false` to excludes draft invoice items in the preview result. | | includeExisting DraftDocItems | 207.0 and later  | [Preview Subscription](https://www.zuora.com/developer/api-references/api/operation/POST_PreviewSubscription \"Preview Subscription\"); [Update Subscription](https://www.zuora.com/developer/api-references/api/operation/PUT_Subscription \"Update Subscription\") | Specifies whether to include draft invoice items in subscription previews. Specify it to be `true` (default) to include draft invoice items in the preview result. Specify it to be `false` to excludes draft invoice items in the preview result. | | previewType | 206.0 and earlier| [Preview Subscription](https://www.zuora.com/developer/api-references/api/operation/POST_PreviewSubscription \"Preview Subscription\"); [Update Subscription](https://www.zuora.com/developer/api-references/api/operation/PUT_Subscription \"Update Subscription\") | The type of preview you will receive. The possible values are `InvoiceItem`(default), `ChargeMetrics`, and `InvoiceItemChargeMetrics`. | | previewType | 207.0 and later  | [Preview Subscription](https://www.zuora.com/developer/api-references/api/operation/POST_PreviewSubscription \"Preview Subscription\"); [Update Subscription](https://www.zuora.com/developer/api-references/api/operation/PUT_Subscription \"Update Subscription\") | The type of preview you will receive. The possible values are `LegalDoc`(default), `ChargeMetrics`, and `LegalDocChargeMetrics`. | | runBilling  | 211.0 and later  | [Create Subscription](https://www.zuora.com/developer/api-references/api/operation/POST_Subscription \"Create Subscription\"); [Update Subscription](https://www.zuora.com/developer/api-references/api/operation/PUT_Subscription \"Update Subscription\"); [Renew Subscription](https://www.zuora.com/developer/api-references/api/operation/PUT_RenewSubscription \"Renew Subscription\"); [Cancel Subscription](https://www.zuora.com/developer/api-references/api/operation/PUT_CancelSubscription \"Cancel Subscription\"); [Suspend Subscription](https://www.zuora.com/developer/api-references/api/operation/PUT_SuspendSubscription \"Suspend Subscription\"); [Resume Subscription](https://www.zuora.com/developer/api-references/api/operation/PUT_ResumeSubscription \"Resume Subscription\"); [Create Account](https://www.zuora.com/developer/api-references/api/operation/POST_Account \"Create Account\")|Generates an invoice or credit memo for a subscription. **Note:** Credit memos are only available if you have the Invoice Settlement feature enabled. | | invoiceDate | 214.0 and earlier  | [Invoice and Collect](https://www.zuora.com/developer/api-references/api/operation/POST_TransactionInvoicePayment \"Invoice and Collect\") |Date that should appear on the invoice being generated, as `yyyy-mm-dd`. | | invoiceTargetDate | 214.0 and earlier  | [Invoice and Collect](https://www.zuora.com/developer/api-references/api/operation/POST_TransactionInvoicePayment \"Invoice and Collect\") |Date through which to calculate charges on this account if an invoice is generated, as `yyyy-mm-dd`. | | documentDate | 215.0 and later | [Invoice and Collect](https://www.zuora.com/developer/api-references/api/operation/POST_TransactionInvoicePayment \"Invoice and Collect\") |Date that should appear on the invoice and credit memo being generated, as `yyyy-mm-dd`. | | targetDate | 215.0 and later | [Invoice and Collect](https://www.zuora.com/developer/api-references/api/operation/POST_TransactionInvoicePayment \"Invoice and Collect\") |Date through which to calculate charges on this account if an invoice or a credit memo is generated, as `yyyy-mm-dd`. | | memoItemAmount | 223.0 and earlier | [Create credit memo from charge](https://www.zuora.com/developer/api-references/api/operation/POST_CreditMemoFromPrpc \"Create credit memo from charge\"); [Create debit memo from charge](https://www.zuora.com/developer/api-references/api/operation/POST_DebitMemoFromPrpc \"Create debit memo from charge\") | Amount of the memo item. | | amount | 224.0 and later | [Create credit memo from charge](https://www.zuora.com/developer/api-references/api/operation/POST_CreditMemoFromPrpc \"Create credit memo from charge\"); [Create debit memo from charge](https://www.zuora.com/developer/api-references/api/operation/POST_DebitMemoFromPrpc \"Create debit memo from charge\") | Amount of the memo item. | | subscriptionNumbers | 222.4 and earlier | [Create order](https://www.zuora.com/developer/api-references/api/operation/POST_Order \"Create order\") | Container for the subscription numbers of the subscriptions in an order. | | subscriptions | 223.0 and later | [Create order](https://www.zuora.com/developer/api-references/api/operation/POST_Order \"Create order\") | Container for the subscription numbers and statuses in an order. | | creditTaxItems | 238.0 and earlier | [Get credit memo items](https://www.zuora.com/developer/api-references/api/operation/GET_CreditMemoItems \"Get credit memo items\"); [Get credit memo item](https://www.zuora.com/developer/api-references/api/operation/GET_CreditMemoItem \"Get credit memo item\") | Container for the taxation items of the credit memo item. | | taxItems | 238.0 and earlier | [Get debit memo items](https://www.zuora.com/developer/api-references/api/operation/GET_DebitMemoItems \"Get debit memo items\"); [Get debit memo item](https://www.zuora.com/developer/api-references/api/operation/GET_DebitMemoItem \"Get debit memo item\") | Container for the taxation items of the debit memo item. | | taxationItems | 239.0 and later | [Get credit memo items](https://www.zuora.com/developer/api-references/api/operation/GET_CreditMemoItems \"Get credit memo items\"); [Get credit memo item](https://www.zuora.com/developer/api-references/api/operation/GET_CreditMemoItem \"Get credit memo item\"); [Get debit memo items](https://www.zuora.com/developer/api-references/api/operation/GET_DebitMemoItems \"Get debit memo items\"); [Get debit memo item](https://www.zuora.com/developer/api-references/api/operation/GET_DebitMemoItem \"Get debit memo item\") | Container for the taxation items of the memo item. | | chargeId | 256.0 and earlier | [Create credit memo from charge](https://www.zuora.com/developer/api-references/api/operation/POST_CreditMemoFromPrpc \"Create credit memo from charge\"); [Create debit memo from charge](https://www.zuora.com/developer/api-references/api/operation/POST_DebitMemoFromPrpc \"Create debit memo from charge\") | ID of the product rate plan charge that the memo is created from. | | productRatePlanChargeId | 257.0 and later | [Create credit memo from charge](https://www.zuora.com/developer/api-references/api/operation/POST_CreditMemoFromPrpc \"Create credit memo from charge\"); [Create debit memo from charge](https://www.zuora.com/developer/api-references/api/operation/POST_DebitMemoFromPrpc \"Create debit memo from charge\") | ID of the product rate plan charge that the memo is created from. | | comment | 256.0 and earlier | [Create credit memo from charge](https://www.zuora.com/developer/api-references/api/operation/POST_CreditMemoFromPrpc \"Create credit memo from charge\"); [Create debit memo from charge](https://www.zuora.com/developer/api-references/api/operation/POST_DebitMemoFromPrpc \"Create debit memo from charge\"); [Create credit memo from invoice](https://www.zuora.com/developer/api-references/api/operation/POST_CreditMemoFromInvoice \"Create credit memo from invoice\"); [Create debit memo from invoice](https://www.zuora.com/developer/api-references/api/operation/POST_DebitMemoFromInvoice \"Create debit memo from invoice\"); [Get credit memo items](https://www.zuora.com/developer/api-references/api/operation/GET_CreditMemoItems \"Get credit memo items\"); [Get credit memo item](https://www.zuora.com/developer/api-references/api/operation/GET_CreditMemoItem \"Get credit memo item\"); [Get debit memo items](https://www.zuora.com/developer/api-references/api/operation/GET_DebitMemoItems \"Get debit memo items\"); [Get debit memo item](https://www.zuora.com/developer/api-references/api/operation/GET_DebitMemoItem \"Get debit memo item\") | Comments about the product rate plan charge, invoice item, or memo item. | | description | 257.0 and later | [Create credit memo from charge](https://www.zuora.com/developer/api-references/api/operation/POST_CreditMemoFromPrpc \"Create credit memo from charge\"); [Create debit memo from charge](https://www.zuora.com/developer/api-references/api/operation/POST_DebitMemoFromPrpc \"Create debit memo from charge\"); [Create credit memo from invoice](https://www.zuora.com/developer/api-references/api/operation/POST_CreditMemoFromInvoice \"Create credit memo from invoice\"); [Create debit memo from invoice](https://www.zuora.com/developer/api-references/api/operation/POST_DebitMemoFromInvoice \"Create debit memo from invoice\"); [Get credit memo items](https://www.zuora.com/developer/api-references/api/operation/GET_CreditMemoItems \"Get credit memo items\"); [Get credit memo item](https://www.zuora.com/developer/api-references/api/operation/GET_CreditMemoItem \"Get credit memo item\"); [Get debit memo items](https://www.zuora.com/developer/api-references/api/operation/GET_DebitMemoItems \"Get debit memo items\"); [Get debit memo item](https://www.zuora.com/developer/api-references/api/operation/GET_DebitMemoItem \"Get debit memo item\") | Description of the the product rate plan charge, invoice item, or memo item. | | taxationItems | 309.0 and later | [Preview an order](https://www.zuora.com/developer/api-references/api/operation/POST_PreviewOrder \"Preview an order\") | List of taxation items for an invoice item or a credit memo item. | | batch | 309.0 and earlier | [Create a billing preview run](https://www.zuora.com/developer/api-references/api/operation/POST_BillingPreviewRun \"Create a billing preview run\") | The customer batches to include in the billing preview run. |       | batches | 314.0 and later | [Create a billing preview run](https://www.zuora.com/developer/api-references/api/operation/POST_BillingPreviewRun \"Create a billing preview run\") | The customer batches to include in the billing preview run. | | taxationItems | 315.0 and later | [Preview a subscription](https://www.zuora.com/developer/api-references/api/operation/POST_PreviewSubscription \"Preview a subscription\"); [Update a subscription](https://www.zuora.com/developer/api-references/api/operation/PUT_Subscription \"Update a subscription\")| List of taxation items for an invoice item or a credit memo item. | | billingDocument | 330.0 and later | [Create a payment schedule](https://www.zuora.com/developer/api-references/api/operation/POST_PaymentSchedule \"Create a payment schedule\"); [Create multiple payment schedules at once](https://www.zuora.com/developer/api-references/api/operation/POST_PaymentSchedules \"Create multiple payment schedules at once\")| The billing document with which the payment schedule item is associated. | | paymentId | 336.0 and earlier | [Add payment schedule items to a custom payment schedule](https://www.zuora.com/developer/api-references/api/operation/POST_AddItemsToCustomPaymentSchedule/ \"Add payment schedule items to a custom payment schedule\"); [Update a payment schedule](https://www.zuora.com/developer/api-references/api/operation/PUT_PaymentSchedule/ \"Update a payment schedule\"); [Update a payment schedule item](https://www.zuora.com/developer/api-references/api/operation/PUT_PaymentScheduleItem/ \"Update a payment schedule item\"); [Preview the result of payment schedule update](https://www.zuora.com/developer/api-references/api/operation/PUT_PaymentScheduleUpdatePreview/ \"Preview the result of payment schedule update\"); [Retrieve a payment schedule](https://www.zuora.com/developer/api-references/api/operation/GET_PaymentSchedule/ \"Retrieve a payment schedule\"); [Retrieve a payment schedule item](https://www.zuora.com/developer/api-references/api/operation/GET_PaymentScheduleItem/ \"Retrieve a payment schedule item\"); [List payment schedules by customer account](https://www.zuora.com/developer/api-references/api/operation/GET_PaymentSchedules/ \"List payment schedules by customer account\"); [Cancel a payment schedule](https://www.zuora.com/developer/api-references/api/operation/PUT_CancelPaymentSchedule/ \"Cancel a payment schedule\"); [Cancel a payment schedule item](https://www.zuora.com/developer/api-references/api/operation/PUT_CancelPaymentScheduleItem/ \"Cancel a payment schedule item\");[Skip a payment schedule item](https://www.zuora.com/developer/api-references/api/operation/PUT_SkipPaymentScheduleItem/ \"Skip a payment schedule item\");[Retry failed payment schedule items](https://www.zuora.com/developer/api-references/api/operation/POST_RetryPaymentScheduleItem/ \"Retry failed payment schedule items\") | ID of the payment to be linked to the payment schedule item. | | paymentOption | 337.0 and later | [Create a payment schedule](https://www.zuora.com/developer/api-references/api/operation/POST_PaymentSchedule/ \"Create a payment schedule\"); [Create multiple payment schedules at once](https://www.zuora.com/developer/api-references/api/operation/POST_PaymentSchedules/ \"Create multiple payment schedules at once\"); [Create a payment](https://www.zuora.com/developer/api-references/api/operation/POST_CreatePayment/ \"Create a payment\"); [Add payment schedule items to a custom payment schedule](https://www.zuora.com/developer/api-references/api/operation/POST_AddItemsToCustomPaymentSchedule/ \"Add payment schedule items to a custom payment schedule\"); [Update a payment schedule](https://www.zuora.com/developer/api-references/api/operation/PUT_PaymentSchedule/ \"Update a payment schedule\"); [Update a payment schedule item](https://www.zuora.com/developer/api-references/api/operation/PUT_PaymentScheduleItem/ \"Update a payment schedule item\"); [Preview the result of payment schedule update](https://www.zuora.com/developer/api-references/api/operation/PUT_PaymentScheduleUpdatePreview/ \"Preview the result of payment schedule update\"); [Retrieve a payment schedule](https://www.zuora.com/developer/api-references/api/operation/GET_PaymentSchedule/ \"Retrieve a payment schedule\"); [Retrieve a payment schedule item](https://www.zuora.com/developer/api-references/api/operation/GET_PaymentScheduleItem/ \"Retrieve a payment schedule item\"); [List payment schedules by customer account](https://www.zuora.com/developer/api-references/api/operation/GET_PaymentSchedules/ \"List payment schedules by customer account\"); [Cancel a payment schedule](https://www.zuora.com/developer/api-references/api/operation/PUT_CancelPaymentSchedule/ \"Cancel a payment schedule\"); [Cancel a payment schedule item](https://www.zuora.com/developer/api-references/api/operation/PUT_CancelPaymentScheduleItem/ \"Cancel a payment schedule item\"); [Skip a payment schedule item](https://www.zuora.com/developer/api-references/api/operation/PUT_SkipPaymentScheduleItem/ \"Skip a payment schedule item\"); [Retry failed payment schedule items](https://www.zuora.com/developer/api-references/api/operation/POST_RetryPaymentScheduleItem/ \"Retry failed payment schedule items\"); [List payments](https://www.zuora.com/developer/api-references/api/operation/GET_RetrieveAllPayments/ \"List payments\") | Array of transactional level rules for processing payments. |    #### Version 207.0 and Later  The response structure of the [Preview Subscription](https://www.zuora.com/developer/api-references/api/operation/POST_PreviewSubscription) and [Update Subscription](https://www.zuora.com/developer/api-references/api/operation/PUT_Subscription \"Update Subscription\") methods are changed. The following invoice related response fields are moved to the invoice container:    * amount   * amountWithoutTax   * taxAmount   * invoiceItems   * targetDate   * chargeMetrics   # API Names for Zuora Objects  For information about the Zuora business object model, see [Zuora Business Object Model](https://www.zuora.com/developer/rest-api/general-concepts/object-model/).  You can use the [Describe](https://www.zuora.com/developer/api-references/api/operation/GET_Describe) operation to list the fields of each Zuora object that is available in your tenant. When you call the operation, you must specify the API name of the Zuora object.  The following table provides the API name of each Zuora object:  | Object                                        | API Name                                   | |-----------------------------------------------|--------------------------------------------| | Account                                       | `Account`                                  | | Accounting Code                               | `AccountingCode`                           | | Accounting Period                             | `AccountingPeriod`                         | | Amendment                                     | `Amendment`                                | | Application Group                             | `ApplicationGroup`                         | | Billing Run                                   | <p>`BillingRun` - API name used  in the [Describe](https://www.zuora.com/developer/api-references/api/operation/GET_Describe) operation, Export ZOQL queries, and Data Query.</p> <p>`BillRun` - API name used in the [Actions](https://www.zuora.com/developer/api-references/api/tag/Actions). See the CRUD oprations of [Bill Run](https://www.zuora.com/developer/api-references/api/tag/Bill-Run) for more information about the `BillRun` object. `BillingRun` and `BillRun` have different fields. |                      | Configuration Templates                       | `ConfigurationTemplates`                  | | Contact                                       | `Contact`                                  | | Contact Snapshot                              | `ContactSnapshot`                          | | Credit Balance Adjustment                     | `CreditBalanceAdjustment`                  | | Credit Memo                                   | `CreditMemo`                               | | Credit Memo Application                       | `CreditMemoApplication`                    | | Credit Memo Application Item                  | `CreditMemoApplicationItem`                | | Credit Memo Item                              | `CreditMemoItem`                           | | Credit Memo Part                              | `CreditMemoPart`                           | | Credit Memo Part Item                         | `CreditMemoPartItem`                       | | Credit Taxation Item                          | `CreditTaxationItem`                       | | Custom Exchange Rate                          | `FXCustomRate`                             | | Debit Memo                                    | `DebitMemo`                                | | Debit Memo Item                               | `DebitMemoItem`                            | | Debit Taxation Item                           | `DebitTaxationItem`                        | | Discount Applied Metrics                      | `DiscountAppliedMetrics`                   | | Entity                                        | `Tenant`                                   | | Fulfillment                                   | `Fulfillment`                              | | Feature                                       | `Feature`                                  | | Gateway Reconciliation Event                  | `PaymentGatewayReconciliationEventLog`     | | Gateway Reconciliation Job                    | `PaymentReconciliationJob`                 | | Gateway Reconciliation Log                    | `PaymentReconciliationLog`                 | | Invoice                                       | `Invoice`                                  | | Invoice Adjustment                            | `InvoiceAdjustment`                        | | Invoice Item                                  | `InvoiceItem`                              | | Invoice Item Adjustment                       | `InvoiceItemAdjustment`                    | | Invoice Payment                               | `InvoicePayment`                           | | Invoice Schedule                              | `InvoiceSchedule`                          | | Journal Entry                                 | `JournalEntry`                             | | Journal Entry Item                            | `JournalEntryItem`                         | | Journal Run                                   | `JournalRun`                               | | Notification History - Callout                | `CalloutHistory`                           | | Notification History - Email                  | `EmailHistory`                             | | Offer                                         | `Offer`                             | | Order                                         | `Order`                                    | | Order Action                                  | `OrderAction`                              | | Order ELP                                     | `OrderElp`                                 | | Order Line Items                              | `OrderLineItems`                           |     | Order Item                                    | `OrderItem`                                | | Order MRR                                     | `OrderMrr`                                 | | Order Quantity                                | `OrderQuantity`                            | | Order TCB                                     | `OrderTcb`                                 | | Order TCV                                     | `OrderTcv`                                 | | Payment                                       | `Payment`                                  | | Payment Application                           | `PaymentApplication`                       | | Payment Application Item                      | `PaymentApplicationItem`                   | | Payment Method                                | `PaymentMethod`                            | | Payment Method Snapshot                       | `PaymentMethodSnapshot`                    | | Payment Method Transaction Log                | `PaymentMethodTransactionLog`              | | Payment Method Update                        | `UpdaterDetail`                            | | Payment Part                                  | `PaymentPart`                              | | Payment Part Item                             | `PaymentPartItem`                          | | Payment Run                                   | `PaymentRun`                               | | Payment Transaction Log                       | `PaymentTransactionLog`                    | | Price Book Item                               | `PriceBookItem`                            | | Processed Usage                               | `ProcessedUsage`                           | | Product                                       | `Product`                                  | | Product Feature                               | `ProductFeature`                           | | Product Rate Plan                             | `ProductRatePlan`                          | | Product Rate Plan Charge                      | `ProductRatePlanCharge`                    | | Product Rate Plan Charge Tier                 | `ProductRatePlanChargeTier`                | | Rate Plan                                     | `RatePlan`                                 | | Rate Plan Charge                              | `RatePlanCharge`                           | | Rate Plan Charge Tier                         | `RatePlanChargeTier`                       | | Refund                                        | `Refund`                                   | | Refund Application                            | `RefundApplication`                        | | Refund Application Item                       | `RefundApplicationItem`                    | | Refund Invoice Payment                        | `RefundInvoicePayment`                     | | Refund Part                                   | `RefundPart`                               | | Refund Part Item                              | `RefundPartItem`                           | | Refund Transaction Log                        | `RefundTransactionLog`                     | | Revenue Charge Summary                        | `RevenueChargeSummary`                     | | Revenue Charge Summary Item                   | `RevenueChargeSummaryItem`                 | | Revenue Event                                 | `RevenueEvent`                             | | Revenue Event Credit Memo Item                | `RevenueEventCreditMemoItem`               | | Revenue Event Debit Memo Item                 | `RevenueEventDebitMemoItem`                | | Revenue Event Invoice Item                    | `RevenueEventInvoiceItem`                  | | Revenue Event Invoice Item Adjustment         | `RevenueEventInvoiceItemAdjustment`        | | Revenue Event Item                            | `RevenueEventItem`                         | | Revenue Event Item Credit Memo Item           | `RevenueEventItemCreditMemoItem`           | | Revenue Event Item Debit Memo Item            | `RevenueEventItemDebitMemoItem`            | | Revenue Event Item Invoice Item               | `RevenueEventItemInvoiceItem`              | | Revenue Event Item Invoice Item Adjustment    | `RevenueEventItemInvoiceItemAdjustment`    | | Revenue Event Type                            | `RevenueEventType`                         | | Revenue Schedule                              | `RevenueSchedule`                          | | Revenue Schedule Credit Memo Item             | `RevenueScheduleCreditMemoItem`            | | Revenue Schedule Debit Memo Item              | `RevenueScheduleDebitMemoItem`             | | Revenue Schedule Invoice Item                 | `RevenueScheduleInvoiceItem`               | | Revenue Schedule Invoice Item Adjustment      | `RevenueScheduleInvoiceItemAdjustment`     | | Revenue Schedule Item                         | `RevenueScheduleItem`                      | | Revenue Schedule Item Credit Memo Item        | `RevenueScheduleItemCreditMemoItem`        | | Revenue Schedule Item Debit Memo Item         | `RevenueScheduleItemDebitMemoItem`         | | Revenue Schedule Item Invoice Item            | `RevenueScheduleItemInvoiceItem`           | | Revenue Schedule Item Invoice Item Adjustment | `RevenueScheduleItemInvoiceItemAdjustment` | | Subscription                                  | `Subscription`                             | | Subscription Product Feature                  | `SubscriptionProductFeature`               | | Taxable Item Snapshot                         | `TaxableItemSnapshot`                      | | Taxation Item                                 | `TaxationItem`                             | | Updater Batch                                 | `UpdaterBatch`                             | | Usage                                         | `Usage`                                    |   # noqa: E501
+
+    OpenAPI spec version: 2023-07-24
+    Contact: docs@zuora.com
+    Generated by: https://github.com/swagger-api/swagger-codegen.git
+"""
+
+
+import pprint
+import re  # noqa: F401
+
+import six
+
+from swagger_client.configuration import Configuration
+
+
+class CreateSubscriptionNewSubscriptionOwnerAccount(object):
+    """NOTE: This class is auto generated by the swagger code generator program.
+
+    Do not edit the class manually.
+    """
+
+    """
+    Attributes:
+      swagger_types (dict): The key is attribute name
+                            and the value is attribute type.
+      attribute_map (dict): The key is attribute name
+                            and the value is json key in definition.
+    """
+    swagger_types = {
+        'account_number': 'str',
+        'auto_pay': 'bool',
+        'batch': 'str',
+        'bill_cycle_day': 'int',
+        'bill_to_contact': 'BillToContact',
+        'communication_profile_id': 'str',
+        'credit_card': 'CreditCard',
+        'crm_id': 'str',
+        'currency': 'str',
+        'custom_fields': 'AccountObjectCustomFields',
+        'hpm_credit_card_payment_method_id': 'str',
+        'invoice_delivery_prefs_email': 'bool',
+        'invoice_delivery_prefs_print': 'bool',
+        'invoice_template_id': 'str',
+        'name': 'str',
+        'notes': 'str',
+        'parent_id': 'str',
+        'payment_gateway': 'str',
+        'payment_method': 'PostOrderAccountPaymentMethod',
+        'payment_term': 'str',
+        'sold_to_contact': 'SoldToContact',
+        'tax_info': 'TaxInfo'
+    }
+
+    attribute_map = {
+        'account_number': 'accountNumber',
+        'auto_pay': 'autoPay',
+        'batch': 'batch',
+        'bill_cycle_day': 'billCycleDay',
+        'bill_to_contact': 'billToContact',
+        'communication_profile_id': 'communicationProfileId',
+        'credit_card': 'creditCard',
+        'crm_id': 'crmId',
+        'currency': 'currency',
+        'custom_fields': 'customFields',
+        'hpm_credit_card_payment_method_id': 'hpmCreditCardPaymentMethodId',
+        'invoice_delivery_prefs_email': 'invoiceDeliveryPrefsEmail',
+        'invoice_delivery_prefs_print': 'invoiceDeliveryPrefsPrint',
+        'invoice_template_id': 'invoiceTemplateId',
+        'name': 'name',
+        'notes': 'notes',
+        'parent_id': 'parentId',
+        'payment_gateway': 'paymentGateway',
+        'payment_method': 'paymentMethod',
+        'payment_term': 'paymentTerm',
+        'sold_to_contact': 'soldToContact',
+        'tax_info': 'taxInfo'
+    }
+
+    def __init__(self, account_number=None, auto_pay=None, batch=None, bill_cycle_day=None, bill_to_contact=None, communication_profile_id=None, credit_card=None, crm_id=None, currency=None, custom_fields=None, hpm_credit_card_payment_method_id=None, invoice_delivery_prefs_email=None, invoice_delivery_prefs_print=None, invoice_template_id=None, name=None, notes=None, parent_id=None, payment_gateway=None, payment_method=None, payment_term=None, sold_to_contact=None, tax_info=None, _configuration=None):  # noqa: E501
+        """CreateSubscriptionNewSubscriptionOwnerAccount - a model defined in Swagger"""  # noqa: E501
+        if _configuration is None:
+            _configuration = Configuration()
+        self._configuration = _configuration
+
+        self._account_number = None
+        self._auto_pay = None
+        self._batch = None
+        self._bill_cycle_day = None
+        self._bill_to_contact = None
+        self._communication_profile_id = None
+        self._credit_card = None
+        self._crm_id = None
+        self._currency = None
+        self._custom_fields = None
+        self._hpm_credit_card_payment_method_id = None
+        self._invoice_delivery_prefs_email = None
+        self._invoice_delivery_prefs_print = None
+        self._invoice_template_id = None
+        self._name = None
+        self._notes = None
+        self._parent_id = None
+        self._payment_gateway = None
+        self._payment_method = None
+        self._payment_term = None
+        self._sold_to_contact = None
+        self._tax_info = None
+        self.discriminator = None
+
+        if account_number is not None:
+            self.account_number = account_number
+        if auto_pay is not None:
+            self.auto_pay = auto_pay
+        if batch is not None:
+            self.batch = batch
+        self.bill_cycle_day = bill_cycle_day
+        self.bill_to_contact = bill_to_contact
+        if communication_profile_id is not None:
+            self.communication_profile_id = communication_profile_id
+        if credit_card is not None:
+            self.credit_card = credit_card
+        if crm_id is not None:
+            self.crm_id = crm_id
+        self.currency = currency
+        if custom_fields is not None:
+            self.custom_fields = custom_fields
+        if hpm_credit_card_payment_method_id is not None:
+            self.hpm_credit_card_payment_method_id = hpm_credit_card_payment_method_id
+        if invoice_delivery_prefs_email is not None:
+            self.invoice_delivery_prefs_email = invoice_delivery_prefs_email
+        if invoice_delivery_prefs_print is not None:
+            self.invoice_delivery_prefs_print = invoice_delivery_prefs_print
+        if invoice_template_id is not None:
+            self.invoice_template_id = invoice_template_id
+        self.name = name
+        if notes is not None:
+            self.notes = notes
+        if parent_id is not None:
+            self.parent_id = parent_id
+        if payment_gateway is not None:
+            self.payment_gateway = payment_gateway
+        if payment_method is not None:
+            self.payment_method = payment_method
+        if payment_term is not None:
+            self.payment_term = payment_term
+        if sold_to_contact is not None:
+            self.sold_to_contact = sold_to_contact
+        if tax_info is not None:
+            self.tax_info = tax_info
+
+    @property
+    def account_number(self):
+        """Gets the account_number of this CreateSubscriptionNewSubscriptionOwnerAccount.  # noqa: E501
+
+        Account number. For example, A00000001.   # noqa: E501
+
+        :return: The account_number of this CreateSubscriptionNewSubscriptionOwnerAccount.  # noqa: E501
+        :rtype: str
+        """
+        return self._account_number
+
+    @account_number.setter
+    def account_number(self, account_number):
+        """Sets the account_number of this CreateSubscriptionNewSubscriptionOwnerAccount.
+
+        Account number. For example, A00000001.   # noqa: E501
+
+        :param account_number: The account_number of this CreateSubscriptionNewSubscriptionOwnerAccount.  # noqa: E501
+        :type: str
+        """
+        if (self._configuration.client_side_validation and
+                account_number is not None and len(account_number) > 70):
+            raise ValueError("Invalid value for `account_number`, length must be less than or equal to `70`")  # noqa: E501
+
+        self._account_number = account_number
+
+    @property
+    def auto_pay(self):
+        """Gets the auto_pay of this CreateSubscriptionNewSubscriptionOwnerAccount.  # noqa: E501
+
+        Specifies whether future payments are automatically billed when they are due.   # noqa: E501
+
+        :return: The auto_pay of this CreateSubscriptionNewSubscriptionOwnerAccount.  # noqa: E501
+        :rtype: bool
+        """
+        return self._auto_pay
+
+    @auto_pay.setter
+    def auto_pay(self, auto_pay):
+        """Sets the auto_pay of this CreateSubscriptionNewSubscriptionOwnerAccount.
+
+        Specifies whether future payments are automatically billed when they are due.   # noqa: E501
+
+        :param auto_pay: The auto_pay of this CreateSubscriptionNewSubscriptionOwnerAccount.  # noqa: E501
+        :type: bool
+        """
+
+        self._auto_pay = auto_pay
+
+    @property
+    def batch(self):
+        """Gets the batch of this CreateSubscriptionNewSubscriptionOwnerAccount.  # noqa: E501
+
+        Name of the billing batch that the account belongs to. For example, Batch1.   # noqa: E501
+
+        :return: The batch of this CreateSubscriptionNewSubscriptionOwnerAccount.  # noqa: E501
+        :rtype: str
+        """
+        return self._batch
+
+    @batch.setter
+    def batch(self, batch):
+        """Sets the batch of this CreateSubscriptionNewSubscriptionOwnerAccount.
+
+        Name of the billing batch that the account belongs to. For example, Batch1.   # noqa: E501
+
+        :param batch: The batch of this CreateSubscriptionNewSubscriptionOwnerAccount.  # noqa: E501
+        :type: str
+        """
+
+        self._batch = batch
+
+    @property
+    def bill_cycle_day(self):
+        """Gets the bill_cycle_day of this CreateSubscriptionNewSubscriptionOwnerAccount.  # noqa: E501
+
+        Day of the month that the account prefers billing periods to begin on. If set to 0, the bill cycle day will be set as \"AutoSet\".   # noqa: E501
+
+        :return: The bill_cycle_day of this CreateSubscriptionNewSubscriptionOwnerAccount.  # noqa: E501
+        :rtype: int
+        """
+        return self._bill_cycle_day
+
+    @bill_cycle_day.setter
+    def bill_cycle_day(self, bill_cycle_day):
+        """Sets the bill_cycle_day of this CreateSubscriptionNewSubscriptionOwnerAccount.
+
+        Day of the month that the account prefers billing periods to begin on. If set to 0, the bill cycle day will be set as \"AutoSet\".   # noqa: E501
+
+        :param bill_cycle_day: The bill_cycle_day of this CreateSubscriptionNewSubscriptionOwnerAccount.  # noqa: E501
+        :type: int
+        """
+        if self._configuration.client_side_validation and bill_cycle_day is None:
+            raise ValueError("Invalid value for `bill_cycle_day`, must not be `None`")  # noqa: E501
+        if (self._configuration.client_side_validation and
+                bill_cycle_day is not None and bill_cycle_day > 31):  # noqa: E501
+            raise ValueError("Invalid value for `bill_cycle_day`, must be a value less than or equal to `31`")  # noqa: E501
+        if (self._configuration.client_side_validation and
+                bill_cycle_day is not None and bill_cycle_day < 0):  # noqa: E501
+            raise ValueError("Invalid value for `bill_cycle_day`, must be a value greater than or equal to `0`")  # noqa: E501
+
+        self._bill_cycle_day = bill_cycle_day
+
+    @property
+    def bill_to_contact(self):
+        """Gets the bill_to_contact of this CreateSubscriptionNewSubscriptionOwnerAccount.  # noqa: E501
+
+
+        :return: The bill_to_contact of this CreateSubscriptionNewSubscriptionOwnerAccount.  # noqa: E501
+        :rtype: BillToContact
+        """
+        return self._bill_to_contact
+
+    @bill_to_contact.setter
+    def bill_to_contact(self, bill_to_contact):
+        """Sets the bill_to_contact of this CreateSubscriptionNewSubscriptionOwnerAccount.
+
+
+        :param bill_to_contact: The bill_to_contact of this CreateSubscriptionNewSubscriptionOwnerAccount.  # noqa: E501
+        :type: BillToContact
+        """
+        if self._configuration.client_side_validation and bill_to_contact is None:
+            raise ValueError("Invalid value for `bill_to_contact`, must not be `None`")  # noqa: E501
+
+        self._bill_to_contact = bill_to_contact
+
+    @property
+    def communication_profile_id(self):
+        """Gets the communication_profile_id of this CreateSubscriptionNewSubscriptionOwnerAccount.  # noqa: E501
+
+        Internal identifier of the communication profile that Zuora uses when sending notifications to the account's contacts.   # noqa: E501
+
+        :return: The communication_profile_id of this CreateSubscriptionNewSubscriptionOwnerAccount.  # noqa: E501
+        :rtype: str
+        """
+        return self._communication_profile_id
+
+    @communication_profile_id.setter
+    def communication_profile_id(self, communication_profile_id):
+        """Sets the communication_profile_id of this CreateSubscriptionNewSubscriptionOwnerAccount.
+
+        Internal identifier of the communication profile that Zuora uses when sending notifications to the account's contacts.   # noqa: E501
+
+        :param communication_profile_id: The communication_profile_id of this CreateSubscriptionNewSubscriptionOwnerAccount.  # noqa: E501
+        :type: str
+        """
+
+        self._communication_profile_id = communication_profile_id
+
+    @property
+    def credit_card(self):
+        """Gets the credit_card of this CreateSubscriptionNewSubscriptionOwnerAccount.  # noqa: E501
+
+
+        :return: The credit_card of this CreateSubscriptionNewSubscriptionOwnerAccount.  # noqa: E501
+        :rtype: CreditCard
+        """
+        return self._credit_card
+
+    @credit_card.setter
+    def credit_card(self, credit_card):
+        """Sets the credit_card of this CreateSubscriptionNewSubscriptionOwnerAccount.
+
+
+        :param credit_card: The credit_card of this CreateSubscriptionNewSubscriptionOwnerAccount.  # noqa: E501
+        :type: CreditCard
+        """
+
+        self._credit_card = credit_card
+
+    @property
+    def crm_id(self):
+        """Gets the crm_id of this CreateSubscriptionNewSubscriptionOwnerAccount.  # noqa: E501
+
+        External identifier of the account in a CRM system.   # noqa: E501
+
+        :return: The crm_id of this CreateSubscriptionNewSubscriptionOwnerAccount.  # noqa: E501
+        :rtype: str
+        """
+        return self._crm_id
+
+    @crm_id.setter
+    def crm_id(self, crm_id):
+        """Sets the crm_id of this CreateSubscriptionNewSubscriptionOwnerAccount.
+
+        External identifier of the account in a CRM system.   # noqa: E501
+
+        :param crm_id: The crm_id of this CreateSubscriptionNewSubscriptionOwnerAccount.  # noqa: E501
+        :type: str
+        """
+        if (self._configuration.client_side_validation and
+                crm_id is not None and len(crm_id) > 100):
+            raise ValueError("Invalid value for `crm_id`, length must be less than or equal to `100`")  # noqa: E501
+
+        self._crm_id = crm_id
+
+    @property
+    def currency(self):
+        """Gets the currency of this CreateSubscriptionNewSubscriptionOwnerAccount.  # noqa: E501
+
+        ISO 3-letter currency code (uppercase). For example, USD.   # noqa: E501
+
+        :return: The currency of this CreateSubscriptionNewSubscriptionOwnerAccount.  # noqa: E501
+        :rtype: str
+        """
+        return self._currency
+
+    @currency.setter
+    def currency(self, currency):
+        """Sets the currency of this CreateSubscriptionNewSubscriptionOwnerAccount.
+
+        ISO 3-letter currency code (uppercase). For example, USD.   # noqa: E501
+
+        :param currency: The currency of this CreateSubscriptionNewSubscriptionOwnerAccount.  # noqa: E501
+        :type: str
+        """
+        if self._configuration.client_side_validation and currency is None:
+            raise ValueError("Invalid value for `currency`, must not be `None`")  # noqa: E501
+
+        self._currency = currency
+
+    @property
+    def custom_fields(self):
+        """Gets the custom_fields of this CreateSubscriptionNewSubscriptionOwnerAccount.  # noqa: E501
+
+
+        :return: The custom_fields of this CreateSubscriptionNewSubscriptionOwnerAccount.  # noqa: E501
+        :rtype: AccountObjectCustomFields
+        """
+        return self._custom_fields
+
+    @custom_fields.setter
+    def custom_fields(self, custom_fields):
+        """Sets the custom_fields of this CreateSubscriptionNewSubscriptionOwnerAccount.
+
+
+        :param custom_fields: The custom_fields of this CreateSubscriptionNewSubscriptionOwnerAccount.  # noqa: E501
+        :type: AccountObjectCustomFields
+        """
+
+        self._custom_fields = custom_fields
+
+    @property
+    def hpm_credit_card_payment_method_id(self):
+        """Gets the hpm_credit_card_payment_method_id of this CreateSubscriptionNewSubscriptionOwnerAccount.  # noqa: E501
+
+        The ID of the payment method associated with this account. The payment method specified for this field will be set as the default payment method of the account.  If the `autoPay` field is set to `true`, you must provide the credit card payment method ID for either this field or the `creditCard` field, but not both.  For the Credit Card Reference Transaction payment method, you can specify the payment method ID in this field or use the `paymentMethod` field to create a CC Reference Transaction payment method for an account.   # noqa: E501
+
+        :return: The hpm_credit_card_payment_method_id of this CreateSubscriptionNewSubscriptionOwnerAccount.  # noqa: E501
+        :rtype: str
+        """
+        return self._hpm_credit_card_payment_method_id
+
+    @hpm_credit_card_payment_method_id.setter
+    def hpm_credit_card_payment_method_id(self, hpm_credit_card_payment_method_id):
+        """Sets the hpm_credit_card_payment_method_id of this CreateSubscriptionNewSubscriptionOwnerAccount.
+
+        The ID of the payment method associated with this account. The payment method specified for this field will be set as the default payment method of the account.  If the `autoPay` field is set to `true`, you must provide the credit card payment method ID for either this field or the `creditCard` field, but not both.  For the Credit Card Reference Transaction payment method, you can specify the payment method ID in this field or use the `paymentMethod` field to create a CC Reference Transaction payment method for an account.   # noqa: E501
+
+        :param hpm_credit_card_payment_method_id: The hpm_credit_card_payment_method_id of this CreateSubscriptionNewSubscriptionOwnerAccount.  # noqa: E501
+        :type: str
+        """
+
+        self._hpm_credit_card_payment_method_id = hpm_credit_card_payment_method_id
+
+    @property
+    def invoice_delivery_prefs_email(self):
+        """Gets the invoice_delivery_prefs_email of this CreateSubscriptionNewSubscriptionOwnerAccount.  # noqa: E501
+
+        Specifies whether to turn on the invoice delivery method 'Email' for the new account.  Values are:   * `true` (default). Turn on the invoice delivery method 'Email' for the new account. * `false`. Turn off the invoice delivery method 'Email' for the new account.            # noqa: E501
+
+        :return: The invoice_delivery_prefs_email of this CreateSubscriptionNewSubscriptionOwnerAccount.  # noqa: E501
+        :rtype: bool
+        """
+        return self._invoice_delivery_prefs_email
+
+    @invoice_delivery_prefs_email.setter
+    def invoice_delivery_prefs_email(self, invoice_delivery_prefs_email):
+        """Sets the invoice_delivery_prefs_email of this CreateSubscriptionNewSubscriptionOwnerAccount.
+
+        Specifies whether to turn on the invoice delivery method 'Email' for the new account.  Values are:   * `true` (default). Turn on the invoice delivery method 'Email' for the new account. * `false`. Turn off the invoice delivery method 'Email' for the new account.            # noqa: E501
+
+        :param invoice_delivery_prefs_email: The invoice_delivery_prefs_email of this CreateSubscriptionNewSubscriptionOwnerAccount.  # noqa: E501
+        :type: bool
+        """
+
+        self._invoice_delivery_prefs_email = invoice_delivery_prefs_email
+
+    @property
+    def invoice_delivery_prefs_print(self):
+        """Gets the invoice_delivery_prefs_print of this CreateSubscriptionNewSubscriptionOwnerAccount.  # noqa: E501
+
+        Specifies whether to turn on the invoice delivery method 'Print' for the new account. Values are:   * `true`. Turn on the invoice delivery method 'Print' for the new account. * `false` (default). Turn off the invoice delivery method 'Print' for the new account.   # noqa: E501
+
+        :return: The invoice_delivery_prefs_print of this CreateSubscriptionNewSubscriptionOwnerAccount.  # noqa: E501
+        :rtype: bool
+        """
+        return self._invoice_delivery_prefs_print
+
+    @invoice_delivery_prefs_print.setter
+    def invoice_delivery_prefs_print(self, invoice_delivery_prefs_print):
+        """Sets the invoice_delivery_prefs_print of this CreateSubscriptionNewSubscriptionOwnerAccount.
+
+        Specifies whether to turn on the invoice delivery method 'Print' for the new account. Values are:   * `true`. Turn on the invoice delivery method 'Print' for the new account. * `false` (default). Turn off the invoice delivery method 'Print' for the new account.   # noqa: E501
+
+        :param invoice_delivery_prefs_print: The invoice_delivery_prefs_print of this CreateSubscriptionNewSubscriptionOwnerAccount.  # noqa: E501
+        :type: bool
+        """
+
+        self._invoice_delivery_prefs_print = invoice_delivery_prefs_print
+
+    @property
+    def invoice_template_id(self):
+        """Gets the invoice_template_id of this CreateSubscriptionNewSubscriptionOwnerAccount.  # noqa: E501
+
+        Internal identifier of the invoice template that Zuora uses when generating invoices for the account.   # noqa: E501
+
+        :return: The invoice_template_id of this CreateSubscriptionNewSubscriptionOwnerAccount.  # noqa: E501
+        :rtype: str
+        """
+        return self._invoice_template_id
+
+    @invoice_template_id.setter
+    def invoice_template_id(self, invoice_template_id):
+        """Sets the invoice_template_id of this CreateSubscriptionNewSubscriptionOwnerAccount.
+
+        Internal identifier of the invoice template that Zuora uses when generating invoices for the account.   # noqa: E501
+
+        :param invoice_template_id: The invoice_template_id of this CreateSubscriptionNewSubscriptionOwnerAccount.  # noqa: E501
+        :type: str
+        """
+
+        self._invoice_template_id = invoice_template_id
+
+    @property
+    def name(self):
+        """Gets the name of this CreateSubscriptionNewSubscriptionOwnerAccount.  # noqa: E501
+
+        Account name.   # noqa: E501
+
+        :return: The name of this CreateSubscriptionNewSubscriptionOwnerAccount.  # noqa: E501
+        :rtype: str
+        """
+        return self._name
+
+    @name.setter
+    def name(self, name):
+        """Sets the name of this CreateSubscriptionNewSubscriptionOwnerAccount.
+
+        Account name.   # noqa: E501
+
+        :param name: The name of this CreateSubscriptionNewSubscriptionOwnerAccount.  # noqa: E501
+        :type: str
+        """
+        if self._configuration.client_side_validation and name is None:
+            raise ValueError("Invalid value for `name`, must not be `None`")  # noqa: E501
+        if (self._configuration.client_side_validation and
+                name is not None and len(name) > 70):
+            raise ValueError("Invalid value for `name`, length must be less than or equal to `70`")  # noqa: E501
+
+        self._name = name
+
+    @property
+    def notes(self):
+        """Gets the notes of this CreateSubscriptionNewSubscriptionOwnerAccount.  # noqa: E501
+
+        Notes about the account. These notes are only visible to Zuora users.   # noqa: E501
+
+        :return: The notes of this CreateSubscriptionNewSubscriptionOwnerAccount.  # noqa: E501
+        :rtype: str
+        """
+        return self._notes
+
+    @notes.setter
+    def notes(self, notes):
+        """Sets the notes of this CreateSubscriptionNewSubscriptionOwnerAccount.
+
+        Notes about the account. These notes are only visible to Zuora users.   # noqa: E501
+
+        :param notes: The notes of this CreateSubscriptionNewSubscriptionOwnerAccount.  # noqa: E501
+        :type: str
+        """
+        if (self._configuration.client_side_validation and
+                notes is not None and len(notes) > 65535):
+            raise ValueError("Invalid value for `notes`, length must be less than or equal to `65535`")  # noqa: E501
+
+        self._notes = notes
+
+    @property
+    def parent_id(self):
+        """Gets the parent_id of this CreateSubscriptionNewSubscriptionOwnerAccount.  # noqa: E501
+
+        Identifier of the parent customer account for this Account object. Use this field if you have <a href=\"https://knowledgecenter.zuora.com/Billing/Subscriptions/Customer_Accounts/A_Customer_Account_Introduction#Customer_Hierarchy\" target=\"_blank\">Customer Hierarchy</a> enabled.  # noqa: E501
+
+        :return: The parent_id of this CreateSubscriptionNewSubscriptionOwnerAccount.  # noqa: E501
+        :rtype: str
+        """
+        return self._parent_id
+
+    @parent_id.setter
+    def parent_id(self, parent_id):
+        """Sets the parent_id of this CreateSubscriptionNewSubscriptionOwnerAccount.
+
+        Identifier of the parent customer account for this Account object. Use this field if you have <a href=\"https://knowledgecenter.zuora.com/Billing/Subscriptions/Customer_Accounts/A_Customer_Account_Introduction#Customer_Hierarchy\" target=\"_blank\">Customer Hierarchy</a> enabled.  # noqa: E501
+
+        :param parent_id: The parent_id of this CreateSubscriptionNewSubscriptionOwnerAccount.  # noqa: E501
+        :type: str
+        """
+
+        self._parent_id = parent_id
+
+    @property
+    def payment_gateway(self):
+        """Gets the payment_gateway of this CreateSubscriptionNewSubscriptionOwnerAccount.  # noqa: E501
+
+        The payment gateway that Zuora uses when processing electronic payments and refunds for the account. If you do not specify this field or if the value of this field is null, Zuora uses your default payment gateway.   # noqa: E501
+
+        :return: The payment_gateway of this CreateSubscriptionNewSubscriptionOwnerAccount.  # noqa: E501
+        :rtype: str
+        """
+        return self._payment_gateway
+
+    @payment_gateway.setter
+    def payment_gateway(self, payment_gateway):
+        """Sets the payment_gateway of this CreateSubscriptionNewSubscriptionOwnerAccount.
+
+        The payment gateway that Zuora uses when processing electronic payments and refunds for the account. If you do not specify this field or if the value of this field is null, Zuora uses your default payment gateway.   # noqa: E501
+
+        :param payment_gateway: The payment_gateway of this CreateSubscriptionNewSubscriptionOwnerAccount.  # noqa: E501
+        :type: str
+        """
+        if (self._configuration.client_side_validation and
+                payment_gateway is not None and len(payment_gateway) > 40):
+            raise ValueError("Invalid value for `payment_gateway`, length must be less than or equal to `40`")  # noqa: E501
+
+        self._payment_gateway = payment_gateway
+
+    @property
+    def payment_method(self):
+        """Gets the payment_method of this CreateSubscriptionNewSubscriptionOwnerAccount.  # noqa: E501
+
+
+        :return: The payment_method of this CreateSubscriptionNewSubscriptionOwnerAccount.  # noqa: E501
+        :rtype: PostOrderAccountPaymentMethod
+        """
+        return self._payment_method
+
+    @payment_method.setter
+    def payment_method(self, payment_method):
+        """Sets the payment_method of this CreateSubscriptionNewSubscriptionOwnerAccount.
+
+
+        :param payment_method: The payment_method of this CreateSubscriptionNewSubscriptionOwnerAccount.  # noqa: E501
+        :type: PostOrderAccountPaymentMethod
+        """
+
+        self._payment_method = payment_method
+
+    @property
+    def payment_term(self):
+        """Gets the payment_term of this CreateSubscriptionNewSubscriptionOwnerAccount.  # noqa: E501
+
+        Name of the payment term associated with the account. For example, \"Net 30\". The payment term determines the due dates of invoices.   # noqa: E501
+
+        :return: The payment_term of this CreateSubscriptionNewSubscriptionOwnerAccount.  # noqa: E501
+        :rtype: str
+        """
+        return self._payment_term
+
+    @payment_term.setter
+    def payment_term(self, payment_term):
+        """Sets the payment_term of this CreateSubscriptionNewSubscriptionOwnerAccount.
+
+        Name of the payment term associated with the account. For example, \"Net 30\". The payment term determines the due dates of invoices.   # noqa: E501
+
+        :param payment_term: The payment_term of this CreateSubscriptionNewSubscriptionOwnerAccount.  # noqa: E501
+        :type: str
+        """
+
+        self._payment_term = payment_term
+
+    @property
+    def sold_to_contact(self):
+        """Gets the sold_to_contact of this CreateSubscriptionNewSubscriptionOwnerAccount.  # noqa: E501
+
+
+        :return: The sold_to_contact of this CreateSubscriptionNewSubscriptionOwnerAccount.  # noqa: E501
+        :rtype: SoldToContact
+        """
+        return self._sold_to_contact
+
+    @sold_to_contact.setter
+    def sold_to_contact(self, sold_to_contact):
+        """Sets the sold_to_contact of this CreateSubscriptionNewSubscriptionOwnerAccount.
+
+
+        :param sold_to_contact: The sold_to_contact of this CreateSubscriptionNewSubscriptionOwnerAccount.  # noqa: E501
+        :type: SoldToContact
+        """
+
+        self._sold_to_contact = sold_to_contact
+
+    @property
+    def tax_info(self):
+        """Gets the tax_info of this CreateSubscriptionNewSubscriptionOwnerAccount.  # noqa: E501
+
+
+        :return: The tax_info of this CreateSubscriptionNewSubscriptionOwnerAccount.  # noqa: E501
+        :rtype: TaxInfo
+        """
+        return self._tax_info
+
+    @tax_info.setter
+    def tax_info(self, tax_info):
+        """Sets the tax_info of this CreateSubscriptionNewSubscriptionOwnerAccount.
+
+
+        :param tax_info: The tax_info of this CreateSubscriptionNewSubscriptionOwnerAccount.  # noqa: E501
+        :type: TaxInfo
+        """
+
+        self._tax_info = tax_info
+
+    def to_dict(self):
+        """Returns the model properties as a dict"""
+        result = {}
+
+        for attr, _ in six.iteritems(self.swagger_types):
+            value = getattr(self, attr)
+            if isinstance(value, list):
+                result[attr] = list(map(
+                    lambda x: x.to_dict() if hasattr(x, "to_dict") else x,
+                    value
+                ))
+            elif hasattr(value, "to_dict"):
+                result[attr] = value.to_dict()
+            elif isinstance(value, dict):
+                result[attr] = dict(map(
+                    lambda item: (item[0], item[1].to_dict())
+                    if hasattr(item[1], "to_dict") else item,
+                    value.items()
+                ))
+            else:
+                result[attr] = value
+        if issubclass(CreateSubscriptionNewSubscriptionOwnerAccount, dict):
+            for key, value in self.items():
+                result[key] = value
+
+        return result
+
+    def to_str(self):
+        """Returns the string representation of the model"""
+        return pprint.pformat(self.to_dict())
+
+    def __repr__(self):
+        """For `print` and `pprint`"""
+        return self.to_str()
+
+    def __eq__(self, other):
+        """Returns true if both objects are equal"""
+        if not isinstance(other, CreateSubscriptionNewSubscriptionOwnerAccount):
+            return False
+
+        return self.to_dict() == other.to_dict()
+
+    def __ne__(self, other):
+        """Returns true if both objects are not equal"""
+        if not isinstance(other, CreateSubscriptionNewSubscriptionOwnerAccount):
+            return True
+
+        return self.to_dict() != other.to_dict()

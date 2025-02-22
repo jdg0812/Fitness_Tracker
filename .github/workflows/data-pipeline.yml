@@ -1,0 +1,39 @@
+name: data-pipeline-workflow
+
+on: 
+  push:
+  workflow-dispatch:
+  schedule:
+    - cron: "0 22 * * *"
+
+
+jobs:
+  run-data-pipeline:
+    runs-on: ubuntu-latest
+    steps: 
+      - name: Checkout repo content
+        uses: action/checkout@v4
+        with: 
+          token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
+      - name: Setup Python
+        uses: action/setup-python@v5
+        with: 
+          python-version: '3.9'
+          cache: 'pip'
+      - name: Install dependencies
+        uses: pip install -r requirements.txt
+      - name: Run data pipeline
+        env:
+          CLIENT_ID: ${{ secrets.CLIENT_ID }}
+          CLIENT_SECRET: ${{ secrets.CLIENT_SECRET }}
+          REFRESH_TOKEN: ${{ secrets.REFRESH_TOKEN }}
+        run: extract.py
+      - name: Check for changes
+        id: git-check
+        run: |
+          git config user.name 'github-actions'
+          git config user.email 'github-actions@github.com'
+          git add .
+          git diff --staged --quiet || echo "changes=true" >> $GITHUB_ENV
+
+

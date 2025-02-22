@@ -1,5 +1,5 @@
 import requests
-from secret import client_id, client_secret, refresh_token
+#from secret import CLIENT_ID, CLIENT_SECRET, REFRESH_TOKEN
 import pandas as pd
 import sqlite3
 
@@ -15,10 +15,10 @@ import sqlite3
 url = 'https://www.strava.com/api/v3/oauth/token'
 
 data = {
-    'client_id': client_id,
-    'client_secret': client_secret,
+    'client_id': CLIENT_ID,
+    'client_secret': CLIENT_SECRET,
     'grant_type': 'refresh_token',
-    'refresh_token': refresh_token
+    'refresh_token': REFRESH_TOKEN
 }
 
 response = requests.post(url, data=data)

@@ -1,0 +1,13 @@
+Metadata-Version: 2.1
+Name: zuora-swagger-client
+Version: 1.2.0
+Summary: API Reference
+Home-page: 
+Author-email: docs@zuora.com
+Keywords: Swagger,API Reference
+Requires-Dist: certifi (>=2017.4.17)
+Requires-Dist: python-dateutil (>=2.1)
+Requires-Dist: six (>=1.10)
+Requires-Dist: urllib3 (>=1.23)
+
+Zuora API Reference
