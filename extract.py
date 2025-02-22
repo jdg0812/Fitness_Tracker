@@ -2,6 +2,7 @@ import requests
 #from secret import CLIENT_ID, CLIENT_SECRET, REFRESH_TOKEN
 import pandas as pd
 import sqlite3
+import os
 
 #EXTRACT
 
@@ -10,6 +11,10 @@ import sqlite3
 #copy the code in the resulting URL and make a post request 
 # https://www.strava.com/api/v3/oauth/token?client_id=[YOUR CLIENT ID]&client_secret=[YOUR CLIENT SECRET]&code=[CODE]&grant_type=authorization_code 
 # to get the refresh token
+
+client_id = os.getenv('CLIENT_ID')
+client_secret = os.getenv('CLIENT_SECRET')
+refresh_token = os.getenv('REFRESH_TOKEN')
 
 
 url = 'https://www.strava.com/api/v3/oauth/token'
