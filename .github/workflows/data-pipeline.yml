@@ -27,7 +27,7 @@ jobs:
           CLIENT_ID: ${{ secrets.CLIENT_ID }}
           CLIENT_SECRET: ${{ secrets.CLIENT_SECRET }}
           REFRESH_TOKEN: ${{ secrets.REFRESH_TOKEN }}
-        run: extract.py
+        run: python3 extract.py
       - name: Check for changes
         id: git-check
         run: |
