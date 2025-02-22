@@ -33,10 +33,11 @@ if response.status_code == 200:
     results = response.json()
     access_token = results['access_token']
     print(f"Successfully refreshed access token: {access_token}")
-    
     headers = {
         'Authorization': f'Bearer {access_token}'
     }
+else:
+    raise Exception(f"Failed to refresh access token: {response.status_code}, {response.text}")
 
 
 per_page = 200 #max activities per API call
@@ -126,5 +127,5 @@ for index, row in df.iterrows():
 conn.close()
 
 
-## SCHEDULING
+
 
