@@ -20,10 +20,10 @@ refresh_token = os.getenv('REFRESH_TOKEN')
 url = 'https://www.strava.com/api/v3/oauth/token'
 
 data = {
-    'client_id': CLIENT_ID,
-    'client_secret': CLIENT_SECRET,
+    'client_id': client_id,
+    'client_secret': client_secret,
     'grant_type': 'refresh_token',
-    'refresh_token': REFRESH_TOKEN
+    'refresh_token': refresh_token
 }
 
 response = requests.post(url, data=data)
