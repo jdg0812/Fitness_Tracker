@@ -12,11 +12,11 @@ jobs:
     runs-on: ubuntu-latest
     steps: 
       - name: Checkout repo content
-        uses: action/checkout@v4
+        uses: actions/checkout@v4
         with: 
           token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
       - name: Setup Python
-        uses: action/setup-python@v5
+        uses: actions/setup-python@v5
         with: 
           python-version: '3.9'
           cache: 'pip'
